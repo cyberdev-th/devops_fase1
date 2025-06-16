@@ -11,7 +11,7 @@ def test_hello_world(client):
     resposta = client.get('/')
     assert resposta.status_code == 200
     dados_json = resposta.get_json()
-    assert dados_json['message'] == "Pipeline ci/id finalizado com sucesso!"
+    assert dados_json['message'] == "Demonstração final do pipeline ci/cd!"
 
 def test_status(client):
     resposta = client.get('/status')
