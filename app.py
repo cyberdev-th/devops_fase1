@@ -5,7 +5,7 @@ app.config['JSON_AS_ASCII'] = False
 
 @app.route('/', methods=['GET'])
 def hello_world():
-    return jsonify(message="Olá, Mundo! minha api DevOps está no ar!")
+    return jsonify(message="Pipeline ci/id finalizado com sucesso!")
 
 @app.route('/status', methods=['GET'])
 def status():
