@@ -2,7 +2,7 @@ name: CI/CD - Build e Push da Imagem Docker
 
 on:
   push:
-    branches: [ main ] 
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -35,6 +35,8 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: 5. Login no Amazon ECR
@@ -43,8 +45,8 @@ jobs:
       - name: 6. Build, Tag e Push da Imagem para o ECR
         uses: docker/build-push-action@v5
         with:
-          context: . 
-          push: true 
+          context: .
+          push: true
           tags: |
             ${{ env.ECR_REPOSITORY }}:latest
             ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
