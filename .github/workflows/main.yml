@@ -1,31 +1,52 @@
-name: Python CI com Testes 
+name: CI/CD - Build e Push da Imagem Docker
 
-on: 
+on:
   push:
     branches: [ main ] 
   pull_request:
     branches: [ main ]
 
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: 694120675300.dkr.ecr.us-east-1.amazonaws.com/minha-api-devops
+
 jobs:
-  build-and-test: 
-    runs-on: ubuntu-latest 
+  build-and-push:
+    name: Build e Push para ECR
+    runs-on: ubuntu-latest
 
     steps:
       - name: 1. Checkout do Repositório
-        uses: actions/checkout@v4 
+        uses: actions/checkout@v4
 
       - name: 2. Configurar Python
-        uses: actions/setup-python@v5 
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10' 
+          python-version: '3.10'
 
-      - name: 3. Instalar Dependências
+      - name: 3. Instalar Dependências e Rodar Testes
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pytest
 
-      - name: 4. Executar Testes com Pytest
-        run: pytest
+      - name: 4. Configurar Credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: 5. Exibir versão do Python (Opcional)
-        run: python --version
+      - name: 5. Login no Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 6. Build, Tag e Push da Imagem para o ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: . 
+          push: true 
+          tags: |
+            ${{ env.ECR_REPOSITORY }}:latest
+            ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
